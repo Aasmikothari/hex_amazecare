@@ -23,7 +23,6 @@ public class AppointmentService {
     private DoctorRepository doctorRepository;
     private PatientRepository patientRepository;
 
-    // Constructor-based dependency injection
     public AppointmentService(AppointmentRepository appointmentRepository,
                               DoctorRepository doctorRepository,
                               PatientRepository patientRepository) {

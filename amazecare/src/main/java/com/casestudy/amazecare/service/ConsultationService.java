@@ -19,7 +19,6 @@ public class ConsultationService {
     private ConsultationRepository consultationRepository;
     private AppointmentRepository appointmentRepository;
 
-    // Constructor-based injection
     public ConsultationService(ConsultationRepository consultationRepository,
                                AppointmentRepository appointmentRepository) {
         super();

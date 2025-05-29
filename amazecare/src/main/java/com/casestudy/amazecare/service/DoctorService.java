@@ -19,7 +19,6 @@ public class DoctorService {
     private DoctorRepository doctorRepository;
     private DepartmentRepository departmentRepository;
 
-    // Constructor-based dependency injection
     public DoctorService(DoctorRepository doctorRepository, DepartmentRepository departmentRepository) {
         super();
         this.doctorRepository = doctorRepository;
