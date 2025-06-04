@@ -53,7 +53,7 @@ public class DepartmentController {
 	 * # AIM    : Update department by ID
 	 * # PATH   : /api/department/{id}
 	 * # METHOD : PUT
-	 * # PARAM  : Path Variable (id), Request Body { "name": "New Name" }
+	 * # PARAM  : Path Variable (id)
 	 * # RETURN : Department
 	 */
 	@PutMapping("/api/department/{id}")
