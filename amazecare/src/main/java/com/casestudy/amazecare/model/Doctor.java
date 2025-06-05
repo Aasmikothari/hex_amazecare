@@ -27,6 +27,9 @@ public class Doctor {
     @ManyToOne
     @JoinColumn(name = "department_id")  // foreign key column in doctor table
     private Department department;
+    
+    @OneToOne
+    private User user; 
 
     //Getters and Setters
 
@@ -101,5 +104,14 @@ public class Doctor {
     public void setDepartment(Department department) {
         this.department = department;
     }
+
+	public User getUser() {
+		return user;
+	}
+
+	public void setUser(User user) {
+		this.user = user;
+	}
+    
 
 }
