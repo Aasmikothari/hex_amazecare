@@ -12,77 +12,79 @@ import jakarta.persistence.*;
 @Table(name = "medical_record")
 public class MedicalRecord {
 
-    // Primary key for the medical_record table
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    // Link to the appointment this record is associated with
+    private String currentSymptoms;
+    private String physicalExamination;
+    private String diagnosis;
+    private String treatmentPlan;
+
+    @ManyToOne
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
+
     @ManyToOne
     @JoinColumn(name = "appointment_id")
     private Appointment appointment;
 
-    // Link to the consultation held during the appointment
-    @ManyToOne
-    @JoinColumn(name = "consultation_id")
-    private Consultation consultation;
+	public int getId() {
+		return id;
+	}
 
-    // Optional link to the prescription issued (can be null if no meds)
-    @ManyToOne
-    @JoinColumn(name = "prescription_id")
-    private Prescription prescription;
+	public void setId(int id) {
+		this.id = id;
+	}
 
-    private String diagnosisSummary;
-    private String notes;
+	public String getCurrentSymptoms() {
+		return currentSymptoms;
+	}
+
+	public void setCurrentSymptoms(String currentSymptoms) {
+		this.currentSymptoms = currentSymptoms;
+	}
+
+	public String getPhysicalExamination() {
+		return physicalExamination;
+	}
+
+	public void setPhysicalExamination(String physicalExamination) {
+		this.physicalExamination = physicalExamination;
+	}
+
+	public String getDiagnosis() {
+		return diagnosis;
+	}
+
+	public void setDiagnosis(String diagnosis) {
+		this.diagnosis = diagnosis;
+	}
+
+	public String getTreatmentPlan() {
+		return treatmentPlan;
+	}
+
+	public void setTreatmentPlan(String treatmentPlan) {
+		this.treatmentPlan = treatmentPlan;
+	}
+
+	public Patient getPatient() {
+		return patient;
+	}
+
+	public void setPatient(Patient patient) {
+		this.patient = patient;
+	}
+
+	public Appointment getAppointment() {
+		return appointment;
+	}
+
+	public void setAppointment(Appointment appointment) {
+		this.appointment = appointment;
+	}
     
-    //Getters and Setters
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public Appointment getAppointment() {
-        return appointment;
-    }
-
-    public void setAppointment(Appointment appointment) {
-        this.appointment = appointment;
-    }
-
-    public Consultation getConsultation() {
-        return consultation;
-    }
-
-    public void setConsultation(Consultation consultation) {
-        this.consultation = consultation;
-    }
-
-    public Prescription getPrescription() {
-        return prescription;
-    }
-
-    public void setPrescription(Prescription prescription) {
-        this.prescription = prescription;
-    }
-
-    public String getDiagnosisSummary() {
-        return diagnosisSummary;
-    }
-
-    public void setDiagnosisSummary(String diagnosisSummary) {
-        this.diagnosisSummary = diagnosisSummary;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
+    
 
 }

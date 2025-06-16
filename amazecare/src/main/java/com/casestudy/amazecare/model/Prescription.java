@@ -12,69 +12,57 @@ import jakarta.persistence.*;
 @Table(name = "prescription")
 public class Prescription {
 
-    // Primary key for the prescription table
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    // Link to the consultation this prescription belongs to
+    private String medicineName;      // e.g., Paracetamol
+    private String dosage;            // e.g., 0-0-1
+    private String foodInstruction;   // e.g., AF or BF
+
     @ManyToOne
-    @JoinColumn(name = "consultation_id")  // foreign key column
-    private Consultation consultation;
+    @JoinColumn(name = "appointment_id")
+    private Appointment appointment;
 
-    private String medicineName;
-    private String dosage;
-    private String foodInstruction;
-    private String notes;
+	public int getId() {
+		return id;
+	}
 
-    //Getters and Setters
+	public void setId(int id) {
+		this.id = id;
+	}
 
-    public int getId() {
-        return id;
-    }
+	public String getMedicineName() {
+		return medicineName;
+	}
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	public void setMedicineName(String medicineName) {
+		this.medicineName = medicineName;
+	}
 
-    public Consultation getConsultation() {
-        return consultation;
-    }
+	public String getDosage() {
+		return dosage;
+	}
 
-    public void setConsultation(Consultation consultation) {
-        this.consultation = consultation;
-    }
+	public void setDosage(String dosage) {
+		this.dosage = dosage;
+	}
 
-    public String getMedicineName() {
-        return medicineName;
-    }
+	public String getFoodInstruction() {
+		return foodInstruction;
+	}
 
-    public void setMedicineName(String medicineName) {
-        this.medicineName = medicineName;
-    }
+	public void setFoodInstruction(String foodInstruction) {
+		this.foodInstruction = foodInstruction;
+	}
 
-    public String getDosage() {
-        return dosage;
-    }
+	public Appointment getAppointment() {
+		return appointment;
+	}
 
-    public void setDosage(String dosage) {
-        this.dosage = dosage;
-    }
+	public void setAppointment(Appointment appointment) {
+		this.appointment = appointment;
+	}
 
-    public String getFoodInstruction() {
-        return foodInstruction;
-    }
-
-    public void setFoodInstruction(String foodInstruction) {
-        this.foodInstruction = foodInstruction;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public void setNotes(String notes) {
-        this.notes = notes;
-    }
 
 }

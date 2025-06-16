@@ -12,73 +12,86 @@ import java.time.LocalDateTime;
 @Table(name = "appointment")
 public class Appointment {
 
-    // Primary key for the appointment table
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    // The patient who booked the appointment
-    @ManyToOne
-    @JoinColumn(name = "patient_id")  // foreign key column to patient table
-    private Patient patient;
+    private String appointmentDate;    // e.g., 2025-06-18
+    private String appointmentTime;    // e.g., 10:30 AM
+    private String symptoms;           // entered by patient
+    private String reason;             // reason for visit
+    private String status;             // e.g., PENDING, CONFIRMED, COMPLETED, CANCELLED
 
-    // The doctor assigned to this appointment
     @ManyToOne
-    @JoinColumn(name = "doctor_id")   // foreign key column to doctor table
+    @JoinColumn(name = "doctor_id")
     private Doctor doctor;
 
-    private LocalDateTime preferredDatetime;
-    private String symptoms;
-    private String status;
+    @ManyToOne
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
 
-    //Getters and Setters
+	public int getId() {
+		return id;
+	}
 
-    public int getId() {
-        return id;
-    }
+	public void setId(int id) {
+		this.id = id;
+	}
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	public String getAppointmentDate() {
+		return appointmentDate;
+	}
 
-    public Patient getPatient() {
-        return patient;
-    }
+	public void setAppointmentDate(String appointmentDate) {
+		this.appointmentDate = appointmentDate;
+	}
 
-    public void setPatient(Patient patient) {
-        this.patient = patient;
-    }
+	public String getAppointmentTime() {
+		return appointmentTime;
+	}
 
-    public Doctor getDoctor() {
-        return doctor;
-    }
+	public void setAppointmentTime(String appointmentTime) {
+		this.appointmentTime = appointmentTime;
+	}
 
-    public void setDoctor(Doctor doctor) {
-        this.doctor = doctor;
-    }
+	public String getSymptoms() {
+		return symptoms;
+	}
 
-    public LocalDateTime getPreferredDatetime() {
-        return preferredDatetime;
-    }
+	public void setSymptoms(String symptoms) {
+		this.symptoms = symptoms;
+	}
 
-    public void setPreferredDatetime(LocalDateTime preferredDatetime) {
-        this.preferredDatetime = preferredDatetime;
-    }
+	public String getReason() {
+		return reason;
+	}
 
-    public String getSymptoms() {
-        return symptoms;
-    }
+	public void setReason(String reason) {
+		this.reason = reason;
+	}
 
-    public void setSymptoms(String symptoms) {
-        this.symptoms = symptoms;
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public String getStatus() {
-        return status;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+	public Doctor getDoctor() {
+		return doctor;
+	}
+
+	public void setDoctor(Doctor doctor) {
+		this.doctor = doctor;
+	}
+
+	public Patient getPatient() {
+		return patient;
+	}
+
+	public void setPatient(Patient patient) {
+		this.patient = patient;
+	}
 
 }

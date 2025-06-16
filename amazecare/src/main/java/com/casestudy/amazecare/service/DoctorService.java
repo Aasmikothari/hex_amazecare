@@ -5,100 +5,80 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.casestudy.amazecare.exception.ResourceNotFoundException;
-import com.casestudy.amazecare.model.Department;
+import com.casestudy.amazecare.model.Appointment;
+import com.casestudy.amazecare.model.Consultation;
 import com.casestudy.amazecare.model.Doctor;
-import com.casestudy.amazecare.repository.DepartmentRepository;
+import com.casestudy.amazecare.model.Prescription;
+import com.casestudy.amazecare.model.Test;
+import com.casestudy.amazecare.repository.AppointmentRepository;
+import com.casestudy.amazecare.repository.ConsultationRepository;
 import com.casestudy.amazecare.repository.DoctorRepository;
+import com.casestudy.amazecare.repository.PrescriptionRepository;
+import com.casestudy.amazecare.repository.TestRepository;
 
-/**
- * Service class for handling business logic related to Doctors.
- */
 @Service
 public class DoctorService {
 
     private DoctorRepository doctorRepository;
-    private DepartmentRepository departmentRepository;
+    private AppointmentRepository appointmentRepository;
+    private ConsultationRepository consultationRepository;
+    private PrescriptionRepository prescriptionRepository;
+    private TestRepository testRepository;
 
-    public DoctorService(DoctorRepository doctorRepository, DepartmentRepository departmentRepository) {
+    public DoctorService(DoctorRepository doctorRepository,
+                         AppointmentRepository appointmentRepository,
+                         ConsultationRepository consultationRepository,
+                         PrescriptionRepository prescriptionRepository,
+                         TestRepository testRepository) {
         super();
         this.doctorRepository = doctorRepository;
-        this.departmentRepository = departmentRepository;
+        this.appointmentRepository = appointmentRepository;
+        this.consultationRepository = consultationRepository;
+        this.prescriptionRepository = prescriptionRepository;
+        this.testRepository = testRepository;
     }
 
-    /**
-     * Get all doctors in the system.
-     * @return List of all doctors
-     */
-    public List<Doctor> getAllDoctors() {
-        return doctorRepository.findAll();
+    // Get doctor by user ID (for login purpose)
+    public Doctor getDoctorByUserId(int userId) {
+        return doctorRepository.findByUserId(userId);
+    }
+
+    // Get all appointments of doctor by status
+    public List<Appointment> getAppointmentsByDoctorAndStatus(int doctorId, String status) {
+        List<Appointment> allAppointments = appointmentRepository.findByDoctorId(doctorId);
+        return allAppointments.stream()
+                .filter(a -> a.getStatus().equalsIgnoreCase(status))
+                .toList();
+    }
+
+    // Add or update consultation details for an appointment
+    public Consultation addOrUpdateConsultation(int appointmentId, Consultation consultation) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with ID: " + appointmentId));
+
+        consultation.setAppointment(appointment);
+        consultation.setPatient(appointment.getPatient());
+
+        return consultationRepository.save(consultation);
+    }
+
+    // Prescribe medicine for an appointment
+    public Prescription prescribeMedicine(int appointmentId, Prescription prescription) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with ID: " + appointmentId));
+
+        prescription.setAppointment(appointment);
+
+        return prescriptionRepository.save(prescription);
+    }
+
+    // View all tests recommended for a particular appointment
+    public List<Test> getTestsByAppointmentId(int appointmentId) {
+        return testRepository.findByAppointmentId(appointmentId);
     }
     
-    /**
-     * Add a new doctor with department assignment.
-     * @param deptId ID of the department to which the doctor belongs
-     * @param doctor Doctor object with details like name, contact, etc.
-     * @return The saved Doctor object
-     * @throws ResourceNotFoundException if department is not found
-     */
-    public Doctor addDoctor(int deptId, Doctor doctor) {
-        Department dept = departmentRepository.findById(deptId)
-                .orElseThrow(() -> new ResourceNotFoundException("Department not found with ID: " + deptId));
-
-        doctor.setDepartment(dept);
-        return doctorRepository.save(doctor);
+    // Get doctors by department name
+    public List<Doctor> getDoctorsByDepartmentName(String deptName) {
+        return doctorRepository.findByDepartmentName(deptName);
     }
-
-     /**
-     * Get all doctors by department ID.
-     * @param deptId Department ID
-     * @return List of doctors in that department
-     */
-    public List<Doctor> getDoctorsByDepartmentId(int deptId) {
-        return doctorRepository.findByDepartmentId(deptId);
-    }
-
-    /**
-     * Get doctor by ID.
-     * @param doctorId Doctor ID
-     * @return Doctor object
-     * @throws ResourceNotFoundException if doctor is not found
-     */
-    public Doctor getDoctorById(int doctorId) {
-        return doctorRepository.findById(doctorId)
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with ID: " + doctorId));
-    }
-
-    /**
-     * Update doctor details by ID.
-     * @param doctorId ID of doctor to update
-     * @param updatedDoctor Updated fields
-     * @return Updated doctor object
-     * @throws ResourceNotFoundException if doctor is not found
-     */
-    public Doctor updateDoctor(int doctorId, Doctor updatedDoctor) {
-        Doctor doctor = doctorRepository.findById(doctorId)
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with ID: " + doctorId));
-
-        doctor.setName(updatedDoctor.getName());
-        doctor.setEmail(updatedDoctor.getEmail());
-        doctor.setContact(updatedDoctor.getContact());
-        doctor.setQualification(updatedDoctor.getQualification());
-        doctor.setDesignation(updatedDoctor.getDesignation());
-        doctor.setExperience(updatedDoctor.getExperience());
-        doctor.setPassword(updatedDoctor.getPassword());
-
-        return doctorRepository.save(doctor);
-    }
-
-    /**
-     * Delete a doctor by ID.
-     * @param doctorId Doctor ID
-     * @throws ResourceNotFoundException if doctor is not found
-     */
-    public void deleteDoctor(int doctorId) {
-        Doctor doctor = doctorRepository.findById(doctorId)
-                .orElseThrow(() -> new ResourceNotFoundException("Doctor not found with ID: " + doctorId));
-        doctorRepository.delete(doctor);
-    }
-
 }

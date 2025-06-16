@@ -2,68 +2,61 @@ package com.casestudy.amazecare.model;
 
 import jakarta.persistence.*;
 
-/**
- * This class represents a medical Test recommended to a patient.
- * Each test is linked to a specific patient.
- */
-
 @Entity
 @Table(name = "test")
 public class Test {
 
-    // Primary key for the test table
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
-    private String testName;
-    private String status;
-    private String reportPath;
 
-    // Patient who is assigned this test
+    private String testName;    // e.g., "Blood Test", "X-Ray"
+    private String result;      // e.g., "Normal", "Elevated", optional
+    private String status;      // e.g., "Pending", "Completed", optional
+
     @ManyToOne
-    @JoinColumn(name = "patient_id")  // foreign key to patient table
-    private Patient patient;
+    @JoinColumn(name = "appointment_id")
+    private Appointment appointment;
 
-    //Getters and Setters
+	public int getId() {
+		return id;
+	}
 
-    public int getId() {
-        return id;
-    }
+	public void setId(int id) {
+		this.id = id;
+	}
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	public String getTestName() {
+		return testName;
+	}
 
-    public String getTestName() {
-        return testName;
-    }
+	public void setTestName(String testName) {
+		this.testName = testName;
+	}
 
-    public void setTestName(String testName) {
-        this.testName = testName;
-    }
+	public String getResult() {
+		return result;
+	}
 
-    public String getStatus() {
-        return status;
-    }
+	public void setResult(String result) {
+		this.result = result;
+	}
 
-    public void setStatus(String status) {
-        this.status = status;
-    }
+	public String getStatus() {
+		return status;
+	}
 
-    public String getReportPath() {
-        return reportPath;
-    }
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    public void setReportPath(String reportPath) {
-        this.reportPath = reportPath;
-    }
+	public Appointment getAppointment() {
+		return appointment;
+	}
 
-    public Patient getPatient() {
-        return patient;
-    }
-
-    public void setPatient(Patient patient) {
-        this.patient = patient;
-    }
-
+	public void setAppointment(Appointment appointment) {
+		this.appointment = appointment;
+	}
+    
+    
 }

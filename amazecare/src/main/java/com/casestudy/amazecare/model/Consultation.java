@@ -12,69 +12,77 @@ import jakarta.persistence.*;
 @Table(name = "consultation")
 public class Consultation {
 
-    // Primary key for the consultation table
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    // Link to the appointment this consultation belongs to
+    private String symptoms;             // Current symptoms & concerns
+    private String physicalExamination;  // Doctor's notes
+    private String diagnosis;            // e.g., "Viral fever"
+    private String treatmentPlan;        // Doctor's plan (medicine, rest, etc.)
+
     @ManyToOne
-    @JoinColumn(name = "appointment_id")  // foreign key column
+    @JoinColumn(name = "appointment_id")
     private Appointment appointment;
 
-    private String symptoms;
-    private String physicalDetails;
-    private String diagnosis;
-    private String recommendedTests;
+    @ManyToOne
+    @JoinColumn(name = "patient_id")
+    private Patient patient;
 
-    //Getters and Setters
+	public int getId() {
+		return id;
+	}
 
-    public int getId() {
-        return id;
-    }
+	public void setId(int id) {
+		this.id = id;
+	}
 
-    public void setId(int id) {
-        this.id = id;
-    }
+	public String getSymptoms() {
+		return symptoms;
+	}
 
-    public Appointment getAppointment() {
-        return appointment;
-    }
+	public void setSymptoms(String symptoms) {
+		this.symptoms = symptoms;
+	}
 
-    public void setAppointment(Appointment appointment) {
-        this.appointment = appointment;
-    }
+	public String getPhysicalExamination() {
+		return physicalExamination;
+	}
 
-    public String getSymptoms() {
-        return symptoms;
-    }
+	public void setPhysicalExamination(String physicalExamination) {
+		this.physicalExamination = physicalExamination;
+	}
 
-    public void setSymptoms(String symptoms) {
-        this.symptoms = symptoms;
-    }
+	public String getDiagnosis() {
+		return diagnosis;
+	}
 
-    public String getPhysicalDetails() {
-        return physicalDetails;
-    }
+	public void setDiagnosis(String diagnosis) {
+		this.diagnosis = diagnosis;
+	}
 
-    public void setPhysicalDetails(String physicalDetails) {
-        this.physicalDetails = physicalDetails;
-    }
+	public String getTreatmentPlan() {
+		return treatmentPlan;
+	}
 
-    public String getDiagnosis() {
-        return diagnosis;
-    }
+	public void setTreatmentPlan(String treatmentPlan) {
+		this.treatmentPlan = treatmentPlan;
+	}
 
-    public void setDiagnosis(String diagnosis) {
-        this.diagnosis = diagnosis;
-    }
+	public Appointment getAppointment() {
+		return appointment;
+	}
 
-    public String getRecommendedTests() {
-        return recommendedTests;
-    }
+	public void setAppointment(Appointment appointment) {
+		this.appointment = appointment;
+	}
 
-    public void setRecommendedTests(String recommendedTests) {
-        this.recommendedTests = recommendedTests;
-    }
+	public Patient getPatient() {
+		return patient;
+	}
+
+	public void setPatient(Patient patient) {
+		this.patient = patient;
+	}
 
 }

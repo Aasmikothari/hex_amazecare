@@ -1,11 +1,11 @@
 package com.casestudy.amazecare.controller;
 
 import java.security.Principal;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import com.casestudy.amazecare.model.User;
@@ -14,41 +14,53 @@ import com.casestudy.amazecare.util.JwtUtil;
 
 @RestController
 @RequestMapping("/api/user")
+@CrossOrigin(origins = "http://localhost:5173")
 public class UserController {
 
-	@Autowired
-	private UserService userService;
-	
-	@Autowired
-	private JwtUtil jwtUtil;
+    @Autowired
+    private UserService userService;
 
-	/*
-	 * AIM: Insert a new user in DB with encrypted password.
-	 * PATH: /api/user/signup
-	 * METHOD: POST
-	 * RETURN: User with encoded password
-	 */
-	@PostMapping("/signup")
-	public User signUp(@RequestBody User user) {
-		return userService.signUp(user);
-	}
-	
-	/*
-     * AIM    : Generate JWT token after login
+    @Autowired
+    private JwtUtil jwtUtil;
+
+    /*
+     * AIM    : Insert new user with encrypted password
+     * METHOD : POST
+     * PATH   : /api/user/signup
+     * RESPONSE : User object
+     */
+    @PostMapping("/signup")
+    public User signUp(@RequestBody User user) {
+        return userService.signUp(user);
+    }
+
+    /*
+     * AIM    : Generate JWT Token
      * METHOD : GET
      * PATH   : /api/user/token
-     * AUTH   : Basic Authentication required
-     * RESPONSE : JWT token string
+     * RESPONSE : JWT Token string
      */
-	@GetMapping("/token")
-	public ResponseEntity<?> getToken(Principal principal) {
-		try {
-		String token =jwtUtil.createToken(principal.getName()); 
-		return ResponseEntity.status(HttpStatus.OK).body(token);
-		}
-		catch(Exception e){
-			return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-		}
-	}
-	
+    @GetMapping("/token")
+    public ResponseEntity<?> getToken(Principal principal) {
+        try {
+            String token = jwtUtil.createToken(principal.getName());
+            Map<String, Object> map = new HashMap<>();
+            map.put("token", token);
+            return ResponseEntity.status(HttpStatus.OK).body(map);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
+        }
+    }
+
+    /*
+     * AIM    : Get logged-in user details (Admin/Doctor/Patient)
+     * METHOD : GET
+     * PATH   : /api/user/details
+     * RESPONSE : Respective role-specific object
+     */
+    @GetMapping("/details")
+    public Object getLoggedInUserDetails(Principal principal) {
+        String username = principal.getName(); // Get logged-in username
+        return userService.getUserInfo(username);
+    }
 }

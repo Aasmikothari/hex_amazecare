@@ -12,30 +12,26 @@ import jakarta.persistence.*;
 @Table(name = "department")
 public class Department {
 
-    // Primary key of the department table
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    // Name of the department, e.g., "Cardiology", "Orthopedics"
-    private String name;
+    private String name;  // example: Cardiology, Dermatology
 
-    //Getters and Setters
+	public int getId() {
+		return id;
+	}
 
-    public int getId() {
-        return id;
-    }
-    
-    public void setId(int id) {
-        this.id = id;
-    }
+	public void setId(int id) {
+		this.id = id;
+	}
 
-    public String getName() {
-        return name;
-    }
+	public String getName() {
+		return name;
+	}
 
-    public void setName(String name) {
-        this.name = name;
-    }
+	public void setName(String name) {
+		this.name = name;
+	}
 
 }

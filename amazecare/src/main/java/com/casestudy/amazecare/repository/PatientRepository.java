@@ -1,17 +1,16 @@
 package com.casestudy.amazecare.repository;
 
-import java.util.Optional;
-
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import com.casestudy.amazecare.model.Patient;
 
 public interface PatientRepository extends JpaRepository<Patient, Integer> {
 
-    // Find patient by email
-    Optional<Patient> findByEmail(String email);
-
-    // Optional native query (example)
-    @Query(value = "SELECT * FROM patient WHERE email=?1 AND password=?2", nativeQuery = true)
-    Optional<Patient> loginCheckNative(String email, String password);
+    // Get patient by username
+    @Query("SELECT p FROM Patient p WHERE p.user.username = ?1")
+    Patient findByUsername(String username);
+    
+    // Get Patient by User ID
+    @Query("select p from Patient p where p.user.id=?1")
+    Patient findByUserId(int userId);
 }

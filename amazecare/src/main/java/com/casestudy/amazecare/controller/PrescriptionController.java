@@ -3,65 +3,41 @@ package com.casestudy.amazecare.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import com.casestudy.amazecare.model.Prescription;
 import com.casestudy.amazecare.service.PrescriptionService;
 
 @RestController
+@RequestMapping("/api/prescriptions")
 public class PrescriptionController {
 
-	@Autowired
-	private PrescriptionService prescriptionService;
-	
-	/*
-	 * # AIM    : Add a prescription for a consultation
-	 * # PATH   : /api/prescription/{consultationId}
-	 * # METHOD : POST
-	 * # PARAM  : Path Variable (consultationId), Request Body (Prescription)
-	 * # RETURN : Prescription
-	 */
-	@PostMapping("/api/prescription/{consultationId}")
-	public Prescription addPrescription(@PathVariable int consultationId,
-										@RequestBody Prescription prescription) {
-		return prescriptionService.addPrescription(consultationId, prescription);
-	}
+    @Autowired
+    private PrescriptionService prescriptionService;
 
-	/*
-	 * # AIM    : Get all prescriptions for a consultation
-	 * # PATH   : /api/prescription/consultation/{consultationId}
-	 * # METHOD : GET
-	 * # RETURN : List<Prescription>
-	 */
-	@GetMapping("/api/prescription/consultation/{consultationId}")
-	public List<Prescription> getPrescriptionsByConsultation(@PathVariable int consultationId) {
-		return prescriptionService.getPrescriptionsByConsultation(consultationId);
-	}
+    /*
+     * AIM    : Get all prescriptions by appointment ID
+     * METHOD : GET
+     * PATH   : /api/prescriptions/appointment/{appointmentId}
+     * RESPONSE : List of Prescription objects
+     */
+    @GetMapping("/appointment/{appointmentId}")
+    public ResponseEntity<List<Prescription>> getPrescriptionsByAppointment(@PathVariable int appointmentId) {
+        List<Prescription> prescriptions = prescriptionService.getPrescriptionsByAppointmentId(appointmentId);
+        return ResponseEntity.ok(prescriptions);
+    }
 
-	/*
-	 * # AIM    : Update a prescription by ID
-	 * # PATH   : /api/prescription/{prescriptionId}
-	 * # METHOD : PUT
-	 * # PARAM  : Path Variable (prescriptionId), Request Body (Prescription)
-	 * # RETURN : Updated Prescription
-	 */
-	@PutMapping("/api/prescription/{prescriptionId}")
-	public Prescription updatePrescription(@PathVariable int prescriptionId,
-										   @RequestBody Prescription updated) {
-		return prescriptionService.updatePrescription(prescriptionId, updated);
-	}
-
-	/*
-	 * # AIM    : Delete a prescription by ID
-	 * # PATH   : /api/prescription/{prescriptionId}
-	 * # METHOD : DELETE
-	 * # RETURN : String
-	 */
-	@DeleteMapping("/api/prescription/{prescriptionId}")
-	public String deletePrescription(@PathVariable int prescriptionId) {
-		prescriptionService.deletePrescription(prescriptionId);
-		return "Prescription deleted successfully";
-	}
-
-	
+    /*
+     * AIM    : Add a new prescription for an appointment
+     * METHOD : POST
+     * PATH   : /api/prescriptions/{appointmentId}
+     * RESPONSE : Created Prescription object
+     */
+    @PostMapping("/{appointmentId}")
+    public ResponseEntity<Prescription> addPrescription(@PathVariable int appointmentId,
+                                                        @RequestBody Prescription prescription) {
+        Prescription savedPrescription = prescriptionService.addPrescription(appointmentId, prescription);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedPrescription);
+    }
 }

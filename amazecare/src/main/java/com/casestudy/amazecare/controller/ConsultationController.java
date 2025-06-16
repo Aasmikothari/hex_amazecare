@@ -3,64 +3,53 @@ package com.casestudy.amazecare.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
 import com.casestudy.amazecare.model.Consultation;
 import com.casestudy.amazecare.service.ConsultationService;
 
 @RestController
+@RequestMapping("/api/consultations")
 public class ConsultationController {
 
-	@Autowired
-	private ConsultationService consultationService;
-	
-	/*
-	 * # AIM    : Add consultation notes to an appointment
-	 * # PATH   : /api/consultation/{appointmentId}
-	 * # METHOD : POST
-	 * # PARAM  : Path Variable (appointmentId), Request Body (Consultation)
-	 * # RETURN : Consultation
-	 */
-	@PostMapping("/api/consultation/{appointmentId}")
-	public Consultation addConsultation(@PathVariable int appointmentId,
-										@RequestBody Consultation consultation) {
-		return consultationService.addConsultation(appointmentId, consultation);
-	}
+    @Autowired
+    private ConsultationService consultationService;
 
-	/*
-	 * # AIM    : Get all consultations for an appointment
-	 * # PATH   : /api/consultation/appointment/{appointmentId}
-	 * # METHOD : GET
-	 * # RETURN : List<Consultation>
-	 */
-	@GetMapping("/api/consultation/appointment/{appointmentId}")
-	public List<Consultation> getConsultationsByAppointment(@PathVariable int appointmentId) {
-		return consultationService.getConsultationsByAppointment(appointmentId);
-	}
+    /*
+     * AIM    : Add or update consultation details for an appointment
+     * METHOD : POST
+     * PATH   : /api/consultations/{appointmentId}
+     * RESPONSE : Created/Updated Consultation object
+     */
+    @PostMapping("/{appointmentId}")
+    public ResponseEntity<Consultation> addOrUpdateConsultation(@PathVariable int appointmentId,
+                                                                @RequestBody Consultation consultation) {
+        Consultation savedConsultation = consultationService.addOrUpdateConsultation(appointmentId, consultation);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedConsultation);
+    }
 
-	/*
-	 * # AIM    : Update consultation notes
-	 * # PATH   : /api/consultation/{consultationId}
-	 * # METHOD : PUT
-	 * # PARAM  : Path Variable (consultationId), Request Body (Consultation)
-	 * # RETURN : Updated Consultation
-	 */
-	@PutMapping("/api/consultation/{consultationId}")
-	public Consultation updateConsultation(@PathVariable int consultationId,
-										   @RequestBody Consultation updated) {
-		return consultationService.updateConsultation(consultationId, updated);
-	}
+    /*
+     * AIM    : Get consultation details by appointment ID
+     * METHOD : GET
+     * PATH   : /api/consultations/appointment/{appointmentId}
+     * RESPONSE : Consultation object
+     */
+    @GetMapping("/appointment/{appointmentId}")
+    public ResponseEntity<Consultation> getConsultationByAppointment(@PathVariable int appointmentId) {
+        Consultation consultation = consultationService.getConsultationByAppointmentId(appointmentId);
+        return ResponseEntity.ok(consultation);
+    }
 
-	/*
-	 * # AIM    : Delete a consultation
-	 * # PATH   : /api/consultation/{consultationId}
-	 * # METHOD : DELETE
-	 * # RETURN : String
-	 */
-	@DeleteMapping("/api/consultation/{consultationId}")
-	public String deleteConsultation(@PathVariable int consultationId) {
-		consultationService.deleteConsultation(consultationId);
-		return "Consultation deleted successfully";
-	}
-
+    /*
+     * AIM    : Get all consultations of a patient
+     * METHOD : GET
+     * PATH   : /api/consultations/patient/{patientId}
+     * RESPONSE : List of Consultation objects
+     */
+    @GetMapping("/patient/{patientId}")
+    public ResponseEntity<List<Consultation>> getConsultationsByPatient(@PathVariable int patientId) {
+        List<Consultation> consultations = consultationService.getConsultationsByPatientId(patientId);
+        return ResponseEntity.ok(consultations);
+    }
 }

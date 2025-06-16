@@ -3,6 +3,7 @@ package com.casestudy.amazecare;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -12,69 +13,90 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-
-@Configuration //<- This ensures that this class gets called during every API call
+@Configuration
 public class SecurityConfig {
-	@Autowired
-	private JwtFilter jwtFilter;
-	@Bean
-	SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-		http
-			.csrf((csrf) -> csrf.disable()) 
-			.authorizeHttpRequests(auth -> auth
-				    // everyone can access
-				    .requestMatchers("/api/user/signup").permitAll()
-				    .requestMatchers("/api/user/token").authenticated()
-				    .requestMatchers("/api/user/details").authenticated()
-				    .requestMatchers("/api/department/get-all").permitAll()
 
-				    // admin access
-				    .requestMatchers("/api/department/add").hasAuthority("ADMIN")
-				    .requestMatchers("/api/department/update/**").hasAuthority("ADMIN")
-				    .requestMatchers("/api/department/delete/**").hasAuthority("ADMIN")
-				    .requestMatchers("/api/doctor/add").hasAuthority("ADMIN")
-				    .requestMatchers("/api/doctor/delete/**").hasAuthority("ADMIN")
-				    .requestMatchers("/api/patient/get-all").hasAuthority("ADMIN")
+    @Autowired
+    private JwtFilter jwtFilter;
 
-				    // doctor access
-				    .requestMatchers("/api/consultation/add").hasAuthority("DOCTOR")
-				    .requestMatchers("/api/prescription/add").hasAuthority("DOCTOR")
-				    .requestMatchers("/api/test/add").hasAuthority("DOCTOR")
-				    .requestMatchers("/api/medical-record/add").hasAuthority("DOCTOR")
+    @Bean
+    SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
 
-				    // patient access
-				    .requestMatchers("/api/appointment/schedule").hasAuthority("PATIENT")
-				    .requestMatchers("/api/patient/add").hasAuthority("PATIENT")
-				    .requestMatchers("/api/patient/update/**").hasAuthority("PATIENT")
-				    .requestMatchers("/api/patient/delete/**").hasAuthority("PATIENT")
+                // Allow CORS preflight
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-				    // access with admin, doctor, patient
-				    .requestMatchers("/api/doctor/get-all").hasAnyAuthority("ADMIN", "DOCTOR", "PATIENT")
-				    .requestMatchers("/api/appointment/view").hasAnyAuthority("ADMIN", "DOCTOR", "PATIENT")
-				    .requestMatchers("/api/consultation/view").hasAnyAuthority("ADMIN", "DOCTOR", "PATIENT")
-				    .requestMatchers("/api/prescription/view").hasAnyAuthority("ADMIN", "DOCTOR", "PATIENT")
-				    .requestMatchers("/api/test/view").hasAnyAuthority("ADMIN", "DOCTOR", "PATIENT")
-				    .requestMatchers("/api/medical-record/view").hasAnyAuthority("ADMIN", "DOCTOR", "PATIENT")
-				    .requestMatchers("/api/patient/get-one/**").hasAnyAuthority("ADMIN", "DOCTOR", "PATIENT")
-				    .requestMatchers("/api/doctor/update/**").hasAnyAuthority("ADMIN", "DOCTOR", "PATIENT")
+                // PUBLIC ENDPOINTS
+                .requestMatchers("/api/user/signup").permitAll()
+                .requestMatchers("/api/user/token").permitAll()
+                .requestMatchers("/api/departments").permitAll()
+                .requestMatchers("/api/doctors/department/{deptName}").permitAll()
 
-				    // Any other APIs must be authenticated
-				    .anyRequest().authenticated()
-				)
-			
-		 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) 
-		 .httpBasic(Customizer.withDefaults()); //<- this activated http basic technique
-		return http.build();
-	}
-	
-	@Bean
-	PasswordEncoder passwordEncoder() {  //<- Bean saves this object in spring's context
-		return new BCryptPasswordEncoder();
-	}
-	
-	@Bean
-	AuthenticationManager getAuthManager(AuthenticationConfiguration auth) 
-			throws Exception {
-		  return auth.getAuthenticationManager();
-	 }
+                // ADMIN ONLY
+                .requestMatchers("/api/admin/doctors").hasAuthority("ADMIN")
+                .requestMatchers("/api/admin/doctors/{doctorId}").hasAuthority("ADMIN")
+                .requestMatchers("/api/admin/patients").hasAuthority("ADMIN")
+                .requestMatchers("/api/admin/patients/{patientId}").hasAuthority("ADMIN")
+                .requestMatchers("/api/admin/appointments").hasAuthority("ADMIN")
+
+                // DOCTOR ONLY
+                .requestMatchers("/api/doctors/user/{userId}").hasAuthority("DOCTOR")
+                .requestMatchers("/api/doctors/{doctorId}/appointments/{status}").hasAuthority("DOCTOR")
+                .requestMatchers("/api/doctors/{appointmentId}/consultation").hasAuthority("DOCTOR")
+                .requestMatchers("/api/doctors/{appointmentId}/prescription").hasAuthority("DOCTOR")
+                .requestMatchers("/api/doctors/{appointmentId}/tests").hasAuthority("DOCTOR")
+
+                // PATIENT ONLY
+                .requestMatchers("/api/patient/user/{userId}").hasAuthority("PATIENT")
+                .requestMatchers("/api/patient/{patientId}/appointments").hasAuthority("PATIENT")
+                .requestMatchers("/api/patient/appointments/{appointmentId}/cancel").hasAuthority("PATIENT")
+                .requestMatchers("/api/patient/{patientId}/appointments/{status}").hasAuthority("PATIENT")
+                .requestMatchers("/api/patient/{patientId}/medical-records").hasAuthority("PATIENT")
+
+                // APPOINTMENT - Shared by all authenticated roles
+                .requestMatchers("/api/appointments/{appointmentId}").authenticated()
+                .requestMatchers("/api/appointments/{appointmentId}/reschedule").authenticated()
+                .requestMatchers("/api/appointments/{appointmentId}/cancel").authenticated()
+                .requestMatchers("/api/appointments/status/{status}").authenticated()
+                .requestMatchers("/api/appointments/doctor/{doctorId}").authenticated()
+                .requestMatchers("/api/appointments/patient/{patientId}").authenticated()
+
+                // CONSULTATION - Doctor Only
+                .requestMatchers("/api/consultations/{appointmentId}").hasAuthority("DOCTOR")
+                .requestMatchers("/api/consultations/appointment/{appointmentId}").hasAuthority("DOCTOR")
+                .requestMatchers("/api/consultations/patient/{patientId}").hasAuthority("DOCTOR")
+
+                // TEST - Doctor Only
+                .requestMatchers("/api/tests/appointment/{appointmentId}").hasAuthority("DOCTOR")
+                .requestMatchers("/api/tests/status/{status}").hasAuthority("DOCTOR")
+                .requestMatchers("/api/tests/{testId}").hasAuthority("DOCTOR")
+                .requestMatchers("/api/tests/{appointmentId}").hasAuthority("DOCTOR")
+
+                // PRESCRIPTION - Doctor Only
+                .requestMatchers("/api/prescriptions/appointment/{appointmentId}").hasAuthority("DOCTOR")
+                .requestMatchers("/api/prescriptions/{appointmentId}").hasAuthority("DOCTOR")
+
+                // MEDICAL RECORD - Doctor & Patient
+                .requestMatchers("/api/medical-records/patient/{patientId}").hasAnyAuthority("DOCTOR", "PATIENT")
+                .requestMatchers("/api/medical-records/appointment/{appointmentId}").hasAnyAuthority("DOCTOR", "PATIENT")
+
+                .anyRequest().authenticated()
+            )
+            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+            .httpBasic(Customizer.withDefaults());
+
+        return http.build();
+    }
+
+    @Bean
+    PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    AuthenticationManager getAuthManager(AuthenticationConfiguration auth) throws Exception {
+        return auth.getAuthenticationManager();
+    }
 }

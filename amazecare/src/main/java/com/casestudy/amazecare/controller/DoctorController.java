@@ -3,88 +3,92 @@ package com.casestudy.amazecare.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import com.casestudy.amazecare.model.Appointment;
+import com.casestudy.amazecare.model.Consultation;
 import com.casestudy.amazecare.model.Doctor;
+import com.casestudy.amazecare.model.Prescription;
+import com.casestudy.amazecare.model.Test;
 import com.casestudy.amazecare.service.DoctorService;
 
 @RestController
+@RequestMapping("/api/doctors")
 public class DoctorController {
 
-	@Autowired
-	private DoctorService doctorService;
-	
-	/*
-	 * # AIM    : Get all doctors
-	 * # PATH   : /api/doctor
-	 * # METHOD : GET
-	 * # RETURN : List<Doctor>
-	 */
-	@GetMapping("/api/doctor")
-	public List<Doctor> getAllDoctors() {
-		return doctorService.getAllDoctors();
-	}
-	
-	/*
-	 * # AIM    : Add new doctor under a department
-	 * # PATH   : /api/doctor/{deptId}
-	 * # METHOD : POST
-	 * # PARAM  : Path Variable (deptId), Request Body (Doctor)
-	 * # RETURN : Doctor
-	 */
-	@PostMapping("/api/doctor/{deptId}")
-	public Doctor addDoctor(@PathVariable int deptId, @RequestBody Doctor doctor) {
-		return doctorService.addDoctor(deptId, doctor);
-	}
+    @Autowired
+    private DoctorService doctorService;
 
-	/*
-	 * # AIM    : Get all doctors by department ID
-	 * # PATH   : /api/doctor/department/{deptId}
-	 * # METHOD : GET
-	 * # PARAM  : Path Variable (deptId)
-	 * # RETURN : List<Doctor>
-	 */
-	@GetMapping("/api/doctor/department/{deptId}")
-	public List<Doctor> getDoctorsByDepartment(@PathVariable int deptId) {
-		return doctorService.getDoctorsByDepartmentId(deptId);
-	}
+    /*
+     * AIM    : Get doctors by department name
+     * METHOD : GET
+     * PATH   : /api/doctors/department/{deptName}
+     * RESPONSE : List of Doctor objects in that department
+     */
+    @GetMapping("/department/{deptName}")
+    public ResponseEntity<List<Doctor>> getDoctorsByDepartment(@PathVariable String deptName) {
+        List<Doctor> doctors = doctorService.getDoctorsByDepartmentName(deptName);
+        return ResponseEntity.status(HttpStatus.OK).body(doctors);
+    }
 
-	/*
-	 * # AIM    : Get doctor by ID
-	 * # PATH   : /api/doctor/{id}
-	 * # METHOD : GET
-	 * # PARAM  : Path Variable (id)
-	 * # RETURN : Doctor
-	 */
-	@GetMapping("/api/doctor/{id}")
-	public Doctor getDoctorById(@PathVariable int id) {
-		return doctorService.getDoctorById(id);
-	}
+    /*
+     * AIM    : Get doctor by User ID (login purpose)
+     * METHOD : GET
+     * PATH   : /api/doctors/user/{userId}
+     * RESPONSE : Doctor object
+     */
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Doctor> getDoctorByUserId(@PathVariable int userId) {
+        Doctor doctor = doctorService.getDoctorByUserId(userId);
+        return ResponseEntity.ok(doctor);
+    }
 
-	/*
-	 * # AIM    : Update doctor by ID
-	 * # PATH   : /api/doctor/{id}
-	 * # METHOD : PUT
-	 * # PARAM  : Path Variable (id), Request Body (Doctor)
-	 * # RETURN : Updated Doctor
-	 */
-	@PutMapping("/api/doctor/{id}")
-	public Doctor updateDoctor(@PathVariable int id, @RequestBody Doctor updated) {
-		return doctorService.updateDoctor(id, updated);
-	}
+    /*
+     * AIM    : Get all appointments of doctor by status
+     * METHOD : GET
+     * PATH   : /api/doctors/{doctorId}/appointments/{status}
+     * RESPONSE : List of Appointment objects
+     */
+    @GetMapping("/{doctorId}/appointments/{status}")
+    public ResponseEntity<List<Appointment>> getAppointmentsByDoctorAndStatus(@PathVariable int doctorId, @PathVariable String status) {
+        List<Appointment> appointments = doctorService.getAppointmentsByDoctorAndStatus(doctorId, status);
+        return ResponseEntity.ok(appointments);
+    }
 
-	/*
-	 * # AIM    : Delete doctor by ID
-	 * # PATH   : /api/doctor/{id}
-	 * # METHOD : DELETE
-	 * # PARAM  : Path Variable (id)
-	 * # RETURN : String
-	 */
-	@DeleteMapping("/api/doctor/{id}")
-	public String deleteDoctor(@PathVariable int id) {
-		doctorService.deleteDoctor(id);
-		return "Doctor deleted successfully";
-	}
+    /*
+     * AIM    : Add or update consultation for an appointment
+     * METHOD : POST
+     * PATH   : /api/doctors/{appointmentId}/consultation
+     * RESPONSE : Created/Updated Consultation object
+     */
+    @PostMapping("/{appointmentId}/consultation")
+    public ResponseEntity<Consultation> addOrUpdateConsultation(@PathVariable int appointmentId, @RequestBody Consultation consultation) {
+        Consultation savedConsultation = doctorService.addOrUpdateConsultation(appointmentId, consultation);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedConsultation);
+    }
 
+    /*
+     * AIM    : Prescribe medicine for an appointment
+     * METHOD : POST
+     * PATH   : /api/doctors/{appointmentId}/prescription
+     * RESPONSE : Created Prescription object
+     */
+    @PostMapping("/{appointmentId}/prescription")
+    public ResponseEntity<Prescription> prescribeMedicine(@PathVariable int appointmentId, @RequestBody Prescription prescription) {
+        Prescription savedPrescription = doctorService.prescribeMedicine(appointmentId, prescription);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedPrescription);
+    }
 
+    /*
+     * AIM    : Get all tests for an appointment
+     * METHOD : GET
+     * PATH   : /api/doctors/{appointmentId}/tests
+     * RESPONSE : List of Test objects
+     */
+    @GetMapping("/{appointmentId}/tests")
+    public ResponseEntity<List<Test>> getTestsByAppointmentId(@PathVariable int appointmentId) {
+        List<Test> tests = doctorService.getTestsByAppointmentId(appointmentId);
+        return ResponseEntity.ok(tests);
+    }
 }

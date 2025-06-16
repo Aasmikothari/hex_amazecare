@@ -5,84 +5,51 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 
 import com.casestudy.amazecare.exception.ResourceNotFoundException;
-import com.casestudy.amazecare.model.Patient;
+import com.casestudy.amazecare.model.Appointment;
 import com.casestudy.amazecare.model.Test;
-import com.casestudy.amazecare.repository.PatientRepository;
+import com.casestudy.amazecare.repository.AppointmentRepository;
 import com.casestudy.amazecare.repository.TestRepository;
 
-/**
- * Service class for handling business logic related to Medical Tests.
- */
 @Service
 public class TestService {
 
     private TestRepository testRepository;
-    private PatientRepository patientRepository;
+    private AppointmentRepository appointmentRepository;
 
-    // Constructor-based dependency injection
-    public TestService(TestRepository testRepository, PatientRepository patientRepository) {
+    public TestService(TestRepository testRepository,
+                       AppointmentRepository appointmentRepository) {
         super();
         this.testRepository = testRepository;
-        this.patientRepository = patientRepository;
+        this.appointmentRepository = appointmentRepository;
     }
 
-    /**
-     * Assign a medical test to a patient.
-     * @param patientId ID of the patient
-     * @param test Test object with testName and status
-     * @return Saved Test object
-     * @throws ResourceNotFoundException if patient is not found
-     */
-    public Test addTestForPatient(int patientId, Test test) {
-        Patient patient = patientRepository.findById(patientId)
-                .orElseThrow(() -> new ResourceNotFoundException("Patient not found with ID: " + patientId));
-
-        test.setPatient(patient);
-
-        // Default to "Pending" if status is not provided
-        if (test.getStatus() == null) {
-            test.setStatus("Pending");
-        }
-
-        return testRepository.save(test);
+    // Get all tests by appointment ID
+    public List<Test> getTestsByAppointmentId(int appointmentId) {
+        return testRepository.findByAppointmentId(appointmentId);
     }
 
-    /**
-     * Get all tests assigned to a patient.
-     * @param patientId ID of the patient
-     * @return List of tests
-     */
-    public List<Test> getTestsByPatientId(int patientId) {
-        return testRepository.findByPatientId(patientId);
+    // Get tests by status
+    public List<Test> getTestsByStatus(String status) {
+        return testRepository.findByStatus(status);
     }
 
-    /**
-     * Update a test (e.g., change status, attach report).
-     * @param testId ID of the test
-     * @param updated Updated test fields
-     * @return Updated Test object
-     * @throws ResourceNotFoundException if test is not found
-     */
-    public Test updateTest(int testId, Test updated) {
-        Test test = testRepository.findById(testId)
+    // Update result and status of a test
+    public Test updateTestResult(int testId, String result, String status) {
+        Test existingTest = testRepository.findById(testId)
                 .orElseThrow(() -> new ResourceNotFoundException("Test not found with ID: " + testId));
 
-        test.setTestName(updated.getTestName());
-        test.setStatus(updated.getStatus());
-        test.setReportPath(updated.getReportPath());
+        existingTest.setResult(result);
+        existingTest.setStatus(status);
 
+        return testRepository.save(existingTest);
+    }
+
+    // Add a new test for an appointment
+    public Test addTest(int appointmentId, Test test) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new ResourceNotFoundException("Appointment not found with ID: " + appointmentId));
+
+        test.setAppointment(appointment);
         return testRepository.save(test);
     }
-
-    /**
-     * Delete a test by ID.
-     * @param testId ID of the test
-     * @throws ResourceNotFoundException if test is not found
-     */
-    public void deleteTest(int testId) {
-        Test test = testRepository.findById(testId)
-                .orElseThrow(() -> new ResourceNotFoundException("Test not found with ID: " + testId));
-        testRepository.delete(test);
-    }
-
 }

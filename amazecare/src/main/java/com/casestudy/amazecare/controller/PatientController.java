@@ -1,90 +1,80 @@
 package com.casestudy.amazecare.controller;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import com.casestudy.amazecare.model.Appointment;
+import com.casestudy.amazecare.model.MedicalRecord;
 import com.casestudy.amazecare.model.Patient;
 import com.casestudy.amazecare.service.PatientService;
 
 @RestController
+@RequestMapping("/api/patient")
 public class PatientController {
 
-	@Autowired
-	private PatientService patientService;
+    @Autowired
+    private PatientService patientService;
 
+    /*
+     * AIM    : Get patient profile by User ID
+     * METHOD : GET
+     * PATH   : /api/patient/user/{userId}
+     * RESPONSE : Patient object
+     */
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<Patient> getPatientByUserId(@PathVariable int userId) {
+        Patient patient = patientService.getPatientByUserId(userId);
+        return ResponseEntity.ok(patient);
+    }
 
-	/*
-	 * # AIM    : Get all patients
-	 * # PATH   : /api/patient
-	 * # METHOD : GET
-	 * # RETURN : List<Patient>
-	 */
-	@GetMapping("/api/patient")
-	public List<Patient> getAllPatients() {
-		return patientService.getAllPatients();
-	}
-	
-	/*
-	 * # AIM    : Register a new patient
-	 * # PATH   : /api/patient
-	 * # METHOD : POST
-	 * # BODY   : Patient object
-	 * # RETURN : Patient
-	 */
-	@PostMapping("/api/patient")
-	public Patient registerPatient(@RequestBody Patient patient) {
-		return patientService.registerPatient(patient);
-	}
-	
-	/*
-	 * # AIM    : Get patient by ID
-	 * # PATH   : /api/patient/{id}
-	 * # METHOD : GET
-	 * # PARAM  : Path Variable (id)
-	 * # RETURN : Patient
-	 */
-	@GetMapping("/api/patient/{id}")
-	public Patient getPatientById(@PathVariable int id) {
-		return patientService.getPatientById(id);
-	}
+    /*
+     * AIM    : Book a new appointment
+     * METHOD : POST
+     * PATH   : /api/patient/{patientId}/appointments
+     * RESPONSE : Created Appointment object
+     */
+    @PostMapping("/{patientId}/appointments")
+    public ResponseEntity<Appointment> bookAppointment(@PathVariable int patientId, @RequestBody Appointment appointment) {
+        Appointment booked = patientService.bookAppointment(appointment, patientId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(booked);
+    }
 
-	/*
-	 * # AIM    : Update patient by ID
-	 * # PATH   : /api/patient/{id}
-	 * # METHOD : PUT
-	 * # PARAM  : Path Variable (id), Request Body (Patient)
-	 * # RETURN : Updated Patient
-	 */
-	@PutMapping("/api/patient/{id}")
-	public Patient updatePatient(@PathVariable int id, @RequestBody Patient updated) {
-		return patientService.updatePatient(id, updated);
-	}
+    /*
+     * AIM    : Cancel an appointment by appointment ID
+     * METHOD : PUT
+     * PATH   : /api/patient/appointments/{appointmentId}/cancel
+     * RESPONSE : Updated Appointment object with CANCELLED status
+     */
+    @PutMapping("/appointments/{appointmentId}/cancel")
+    public ResponseEntity<Appointment> cancelAppointment(@PathVariable int appointmentId) {
+        Appointment cancelled = patientService.cancelAppointment(appointmentId);
+        return ResponseEntity.ok(cancelled);
+    }
 
-	/*
-	 * # AIM    : Delete patient by ID
-	 * # PATH   : /api/patient/{id}
-	 * # METHOD : DELETE
-	 * # PARAM  : Path Variable (id)
-	 * # RETURN : String
-	 */
-	@DeleteMapping("/api/patient/{id}")
-	public String deletePatient(@PathVariable int id) {
-		patientService.deletePatient(id);
-		return "Patient deleted successfully";
-	}
+    /*
+     * AIM    : Get all appointments of a patient by status
+     * METHOD : GET
+     * PATH   : /api/patient/{patientId}/appointments/{status}
+     * RESPONSE : List of Appointment objects
+     */
+    @GetMapping("/{patientId}/appointments/{status}")
+    public ResponseEntity<List<Appointment>> getAppointmentsByStatus(@PathVariable int patientId, @PathVariable String status) {
+        List<Appointment> appointments = patientService.getAppointmentsByPatientAndStatus(patientId, status);
+        return ResponseEntity.ok(appointments);
+    }
 
-	/*
-	 * # AIM    : Authenticate patient using email & password
-	 * # PATH   : /api/patient/login/{email}/{password}
-	 * # METHOD : GET
-	 * # RETURN : Optional<Patient>
-	 */
-	@GetMapping("/api/patient/login/{email}/{password}")
-	public Optional<Patient> loginPatient(@PathVariable String email, @PathVariable String password) {
-		return patientService.authenticate(email, password);
-	}
-
+    /*
+     * AIM    : Get all medical records of a patient by patient ID
+     * METHOD : GET
+     * PATH   : /api/patient/{patientId}/medical-records
+     * RESPONSE : List of MedicalRecord objects
+     */
+    @GetMapping("/{patientId}/medical-records")
+    public ResponseEntity<List<MedicalRecord>> getMedicalRecords(@PathVariable int patientId) {
+        List<MedicalRecord> records = patientService.getMedicalRecordsByPatientId(patientId);
+        return ResponseEntity.ok(records);
+    }
 }
