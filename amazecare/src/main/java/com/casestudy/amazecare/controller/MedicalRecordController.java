@@ -39,4 +39,25 @@ public class MedicalRecordController {
         MedicalRecord record = medicalRecordService.getMedicalRecordByAppointmentId(appointmentId);
         return ResponseEntity.ok(record);
     }
+    
+    @PostMapping("/appointment/{appointmentId}/patient/{patientId}")
+    public ResponseEntity<MedicalRecord> addOrUpdateMedicalRecord(@PathVariable int appointmentId,
+                                                                  @PathVariable int patientId,
+                                                                  @RequestBody MedicalRecord record) {
+        MedicalRecord saved = medicalRecordService.saveOrUpdateMedicalRecord(record, appointmentId, patientId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+    
+    /*
+     * AIM    : Get all medical records of patients that belong to a doctor's appointments
+     * METHOD : GET
+     * PATH   : /api/medical-records/doctor/{doctorId}
+     * RESPONSE : List of MedicalRecord objects
+     */
+    @GetMapping("/doctor/{doctorId}")
+    public ResponseEntity<List<MedicalRecord>> getAllMedicalRecordsByDoctor(@PathVariable int doctorId) {
+        List<MedicalRecord> records = medicalRecordService.getAllMedicalRecordsByDoctorId(doctorId);
+        return ResponseEntity.ok(records);
+    }
+
 }

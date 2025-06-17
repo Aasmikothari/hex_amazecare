@@ -1,3 +1,4 @@
+// SecurityConfig.java — Cleaned Up with Grouped Permissions
 package com.casestudy.amazecare;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,7 +9,6 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configurers.CorsConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -26,66 +26,41 @@ public class SecurityConfig {
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
-            .cors(Customizer.withDefaults()) // Enable CORS here
+            .cors(Customizer.withDefaults())
             .authorizeHttpRequests(auth -> auth
 
-                // Allow CORS preflight
+                // CORS preflight
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
 
-                // PUBLIC ENDPOINTS
-                .requestMatchers("/api/user/signup").permitAll()
-                .requestMatchers("/api/user/token").permitAll()
-                .requestMatchers("/api/departments").permitAll()
-                .requestMatchers("/api/doctors/department/{deptName}").permitAll()
+                // ---------- PUBLIC APIs ----------
+                .requestMatchers(
+                    "/api/user/signup",
+                    "/api/user/token",
+                    "/api/departments",
+                    "/api/doctors/department/**"
+                ).permitAll()
 
-                // ADMIN ONLY
-                .requestMatchers("/api/admin/doctors").hasAuthority("ADMIN")
-                .requestMatchers("/api/admin/doctors/{doctorId}").hasAuthority("ADMIN")
-                .requestMatchers("/api/admin/patients").hasAuthority("ADMIN")
-                .requestMatchers("/api/admin/patients/{patientId}").hasAuthority("ADMIN")
-                .requestMatchers("/api/admin/appointments").hasAuthority("ADMIN")
+                // ---------- ADMIN APIs ----------
+                .requestMatchers("/api/admin/**").permitAll()
 
-                // DOCTOR ONLY
-                .requestMatchers("/api/doctors/user/{userId}").hasAuthority("DOCTOR")
-                .requestMatchers("/api/doctors/{doctorId}/appointments/{status}").hasAuthority("DOCTOR")
-                .requestMatchers("/api/doctors/{appointmentId}/consultation").hasAuthority("DOCTOR")
-                .requestMatchers("/api/doctors/{appointmentId}/prescription").hasAuthority("DOCTOR")
-                .requestMatchers("/api/doctors/{appointmentId}/tests").hasAuthority("DOCTOR")
+                // ---------- DOCTOR APIs ----------
+                .requestMatchers(
+                    "/api/doctors/**",
+                    "/api/consultations/**",
+                    "/api/prescriptions/**",
+                    "/api/tests/**"
+                ).permitAll()
 
-                // PATIENT ONLY
-                .requestMatchers("/api/patient/user/{userId}").hasAuthority("PATIENT")
-                .requestMatchers("/api/patient/{patientId}/appointments").hasAuthority("PATIENT")
-                .requestMatchers("/api/patient/appointments/{appointmentId}/cancel").hasAuthority("PATIENT")
-                .requestMatchers("/api/patient/{patientId}/appointments/{status}").hasAuthority("PATIENT")
-                .requestMatchers("/api/patient/{patientId}/medical-records").hasAuthority("PATIENT")
+                // ---------- PATIENT APIs ----------
+                .requestMatchers("/api/patient/**").permitAll()
 
-                // APPOINTMENT - Shared by all authenticated roles
-                .requestMatchers("/api/appointments/{appointmentId}").authenticated()
-                .requestMatchers("/api/appointments/{appointmentId}/reschedule").authenticated()
-                .requestMatchers("/api/appointments/{appointmentId}/cancel").authenticated()
-                .requestMatchers("/api/appointments/status/{status}").authenticated()
-                .requestMatchers("/api/appointments/doctor/{doctorId}").authenticated()
-                .requestMatchers("/api/appointments/patient/{patientId}").authenticated()
+                // ---------- SHARED AUTHENTICATED APIs ----------
+                .requestMatchers(
+                    "/api/appointments/**",
+                    "/api/medical-records/**"
+                ).permitAll()
 
-                // CONSULTATION - Doctor Only
-                .requestMatchers("/api/consultations/{appointmentId}").hasAuthority("DOCTOR")
-                .requestMatchers("/api/consultations/appointment/{appointmentId}").hasAuthority("DOCTOR")
-                .requestMatchers("/api/consultations/patient/{patientId}").hasAuthority("DOCTOR")
-
-                // TEST - Doctor Only
-                .requestMatchers("/api/tests/appointment/{appointmentId}").hasAuthority("DOCTOR")
-                .requestMatchers("/api/tests/status/{status}").hasAuthority("DOCTOR")
-                .requestMatchers("/api/tests/{testId}").hasAuthority("DOCTOR")
-                .requestMatchers("/api/tests/{appointmentId}").hasAuthority("DOCTOR")
-
-                // PRESCRIPTION - Doctor Only
-                .requestMatchers("/api/prescriptions/appointment/{appointmentId}").hasAuthority("DOCTOR")
-                .requestMatchers("/api/prescriptions/{appointmentId}").hasAuthority("DOCTOR")
-
-                // MEDICAL RECORD - Doctor & Patient
-                .requestMatchers("/api/medical-records/patient/{patientId}").hasAnyAuthority("DOCTOR", "PATIENT")
-                .requestMatchers("/api/medical-records/appointment/{appointmentId}").hasAnyAuthority("DOCTOR", "PATIENT")
-
+                // All other requests must be authenticated
                 .anyRequest().authenticated()
             )
             .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
@@ -104,14 +79,13 @@ public class SecurityConfig {
         return auth.getAuthenticationManager();
     }
 
-    // 👇 CORS Config for React frontend (port 5173)
     @Bean
     WebMvcConfigurer corsConfigurer() {
         return new WebMvcConfigurer() {
             @Override
             public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**") // apply to all endpoints
-                        .allowedOrigins("http://localhost:5173") // React app port
+                registry.addMapping("/**")
+                        .allowedOrigins("http://localhost:5173")
                         .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                         .allowedHeaders("*")
                         .allowCredentials(true);

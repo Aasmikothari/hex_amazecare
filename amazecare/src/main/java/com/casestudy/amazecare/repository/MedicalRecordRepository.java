@@ -14,4 +14,8 @@ public interface MedicalRecordRepository extends JpaRepository<MedicalRecord, In
     // Get medical record by appointment ID
     @Query("SELECT m FROM MedicalRecord m WHERE m.appointment.id = ?1")
     MedicalRecord findByAppointmentId(int appointmentId);
+    
+    //Find all medical records for a doctor's appointments
+    @Query("SELECT mr FROM MedicalRecord mr WHERE mr.appointment.doctor.id = :doctorId")
+    List<MedicalRecord> findAllByDoctorId(int doctorId);
 }

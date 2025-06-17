@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import com.casestudy.amazecare.model.Appointment;
 import com.casestudy.amazecare.model.Consultation;
 import com.casestudy.amazecare.model.Doctor;
+import com.casestudy.amazecare.model.MedicalRecord;
 import com.casestudy.amazecare.model.Prescription;
 import com.casestudy.amazecare.model.Test;
 import com.casestudy.amazecare.service.DoctorService;
@@ -91,4 +92,5 @@ public class DoctorController {
         List<Test> tests = doctorService.getTestsByAppointmentId(appointmentId);
         return ResponseEntity.ok(tests);
     }
+   
 }
